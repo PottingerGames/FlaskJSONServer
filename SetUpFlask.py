@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 
-API_KEY = "your-secret-key"  # Replace this with your real key
+API_KEY = "e7f13ab2-85a7-4d92-80c3-bf04cd519be3"  # Replace this with your real key
 
 @app.route('/receive-json', methods=['POST'])
 def receive_json():

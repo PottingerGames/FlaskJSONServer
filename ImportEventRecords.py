@@ -74,8 +74,10 @@ def insert_stage_events(events):
 
 def main():
     item_events = fetch_logs("get-item-logs")
+    print(f"Fetched {len(item_events)} item logs")
     insert_item_events(item_events)
     stage_events = fetch_logs("get-stage-logs")
+    print(f"Fetched {len(stage_events)} stage logs")
     insert_stage_events(stage_events)
 
 if __name__ == "__main__":

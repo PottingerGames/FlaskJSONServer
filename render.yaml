@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: flask-json-endpoint
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: python SetUpFlask.py
+    envVars:
+      - key: FLASK_ENV
+        value: production

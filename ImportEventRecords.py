@@ -1,5 +1,6 @@
 import requests
 import pyodbc
+from datetime import datetime
 
 API_KEY = "e7f13ab2-85a7-4d92-80c3-bf04cd519be3"
 BASE_URL = "https://flaskjsonserver.onrender.com"
@@ -20,6 +21,13 @@ def fetch_logs(endpoint):
 
 def insert_item_events(events):
     for event in events:
+        raw_date = event.get("received_at")
+        try:
+            # Try parsing ISO8601 datetime string to Python datetime object
+            dt = datetime.fromisoformat(raw_date)
+        except Exception as e:
+            print(f"Error parsing date '{raw_date}': {e}")
+            continue
         cursor.execute("SELECT COUNT(*) FROM [Fact].[ItemEvents] WHERE ReceivedAt = ?", (event.get("received_at"),))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
@@ -49,6 +57,13 @@ def insert_item_events(events):
 
 def insert_stage_events(events):
     for event in events:
+        raw_date = event.get("received_at")
+        try:
+            # Try parsing ISO8601 datetime string to Python datetime object
+            dt = datetime.fromisoformat(raw_date)
+        except Exception as e:
+            print(f"Error parsing date '{raw_date}': {e}")
+            continue
         cursor.execute("SELECT COUNT(*) FROM [Fact].[StageEvent] WHERE ReceivedAt = ?", (event.get("received_at"),))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""

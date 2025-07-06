@@ -14,8 +14,8 @@ def log_to_file(filename, data):
         f.write(json.dumps(data) + "\n")
 
 
-@app.route('/receive-json', methods=['POST'])  # For Item Events
-def receive_json():
+@app.route('/receive-item', methods=['POST'])  # For Item Events
+def receive_item():
     api_key = request.headers.get('x-api-key')
     if api_key != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401

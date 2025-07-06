@@ -1,82 +1,82 @@
-# This will import the data from the JSON file in the flask
+import requests
 import pyodbc
+
+API_KEY = "e7f13ab2-85a7-4d92-80c3-bf04cd519be3"
+BASE_URL = "https://flaskjsonserver.onrender.com"
 
 conn = pyodbc.connect(
     "Driver={ODBC Driver 17 for SQL Server};"
-    "Server=DESKTOP-K9VSNBN\SQLEXPRESS;"  # Adjust if your instance is named differently
+    "Server=DESKTOP-K9VSNBN\\SQLEXPRESS;"
     "Database=MinesNMayhem;"
     "Trusted_Connection=yes;"
 )
 cursor = conn.cursor()
 
-# Function to import event records from a JSONL file into the database
-import json
+def fetch_logs(endpoint):
+    headers = {"x-api-key": API_KEY}
+    response = requests.get(f"{BASE_URL}/{endpoint}", headers=headers)
+    response.raise_for_status()
+    return response.json()
 
-def read_jsonl(file_path):
-    with open(file_path, 'r') as f:
-        for line in f:
-            yield json.loads(line)
+def insert_item_events(events):
+    for event in events:
+        cursor.execute("SELECT COUNT(*) FROM [Fact].[ItemEvents] WHERE ReceivedAt = ?", (event.get("received_at"),))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("""
+                INSERT INTO [Fact].[ItemEvents] (
+                    GameVersion, SteamID64, RunId, ReceivedAt, Level, Stage, EventType,
+                    TreasureCode, PotionCode, ElixirCode, RelicCode, ChestCode, TokenCode
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event.get("GameVersion"),
+                event.get("SteamID64"),
+                event.get("RunId"),
+                event.get("received_at"),
+                event.get("Level"),
+                event.get("Stage"),
+                event.get("EventType"),
+                event.get("TreasureCode"),
+                event.get("PotionCode"),
+                event.get("ElixirCode"),
+                event.get("RelicCode"),
+                event.get("ChestCode"),
+                event.get("TokenCode"),
+            ))
+            print(f"Inserted ItemEvent at {event.get('received_at')}")
+        else:
+            print(f"Skipped duplicate ItemEvent at {event.get('received_at')}")
+    conn.commit()
 
-for event in read_jsonl("logs_item.jsonl"):
-    cursor.execute("""
-    SELECT COUNT(*) FROM [Fact].[ItemEvents]
-    WHERE ReceivedAt = ?
-    """, (
-        event.get("received_at"),
-    ))
-    if cursor.fetchone()[0] == 0:
-        # safe to insert
-        cursor.execute("""
-            INSERT INTO [Fact].[ItemEvents] (
-                GameVersion, SteamID64, RunId, ReceivedAt, Level, Stage, EventType,
-                TreasureCode, PotionCode, ElixirCode, RelicCode, ChestCode, TokenCode
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            event.get("GameVersion"),
-            event.get("SteamID64"),
-            event.get("RunId"),
-            event.get("received_at"),
-            event.get("Level"),
-            event.get("Stage"),
-            event.get("EventType"),
-            event.get("TreasureCode"),
-            event.get("PotionCode"),
-            event.get("ElixirCode"),
-            event.get("RelicCode"),
-            event.get("ChestCode"),
-            event.get("TokenCode")
-        ))
-        print(f"Inserted ItemEvent at {event.get('received_at')}")
-    else:
-        print(f"Skipped duplicate ItemEvent at {event.get('received_at')}")
-conn.commit()
+def insert_stage_events(events):
+    for event in events:
+        cursor.execute("SELECT COUNT(*) FROM [Fact].[StageEvent] WHERE ReceivedAt = ?", (event.get("received_at"),))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("""
+                INSERT INTO [Fact].[StageEvent] (
+                    GameVersion, SteamID64, RunId, ReceivedAt, Level, Stage,
+                    BossCode, Victory, Score
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event.get("GameVersion"),
+                event.get("SteamID64"),
+                event.get("RunId"),
+                event.get("received_at"),
+                event.get("Level"),
+                event.get("Stage"),
+                event.get("BossCode"),
+                event.get("Victory"),
+                event.get("Score"),
+            ))
+            print(f"Inserted StageEvent at {event.get('received_at')}")
+        else:
+            print(f"Skipped duplicate StageEvent at {event.get('received_at')}")
+    conn.commit()
 
-for event in read_jsonl("logs_stage.jsonl"):
-    cursor.execute("""
-    SELECT COUNT(*) FROM [Fact].[StageEvent]
-    WHERE ReceivedAt = ?
-    """, (
-        event.get("received_at"),
-    ))
-    if cursor.fetchone()[0] == 0:
-        # safe to insert
-        cursor.execute("""
-            INSERT INTO [Fact].[StageEvent] (
-                GameVersion, SteamID64, RunId, ReceivedAt, Level, Stage,
-                BossCode, Victory, Score
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            event.get("GameVersion"),
-            event.get("SteamID64"),
-            event.get("RunId"),
-            event.get("received_at"),
-            event.get("Level"),
-            event.get("Stage"),
-            event.get("BossCode"),
-            event.get("Victory"), 
-            event.get("Score")
-        ))
-        print(f"Inserted StageEvent at {event.get('received_at')}")
-    else:
-        print(f"Skipped duplicate StageEvent at {event.get('received_at')}")
-conn.commit()
+def main():
+    item_events = fetch_logs("get-item-logs")
+    insert_item_events(item_events)
+    stage_events = fetch_logs("get-stage-logs")
+    insert_stage_events(stage_events)
+
+if __name__ == "__main__":
+    main()

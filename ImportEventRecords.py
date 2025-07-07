@@ -28,7 +28,7 @@ def insert_item_events(events):
         except Exception as e:
             print(f"Error parsing date '{raw_date}': {e}")
             continue
-        cursor.execute("SELECT COUNT(*) FROM [Fact].[ItemEvents] WHERE ReceivedAt = ?", (event.get("received_at"),))
+        cursor.execute("SELECT COUNT(*) FROM [Fact].[ItemEvents] WHERE ReceivedAt = ?", (dt,))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
                 INSERT INTO [Fact].[ItemEvents] (
@@ -64,7 +64,7 @@ def insert_stage_events(events):
         except Exception as e:
             print(f"Error parsing date '{raw_date}': {e}")
             continue
-        cursor.execute("SELECT COUNT(*) FROM [Fact].[StageEvent] WHERE ReceivedAt = ?", (event.get("received_at"),))
+        cursor.execute("SELECT COUNT(*) FROM [Fact].[StageEvent] WHERE ReceivedAt = ?", (dt,))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
                 INSERT INTO [Fact].[StageEvent] (

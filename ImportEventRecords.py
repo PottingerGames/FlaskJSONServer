@@ -83,7 +83,6 @@ def insert_stage_events(events):
                 event.get("Score"),
                 event.get("TurnsTaken"),
             ))
-            print(f"Inserted StageEvent at {event.get('received_at')}")
         else:
             print(f"Skipped duplicate StageEvent at {event.get('received_at')}")
     conn.commit()

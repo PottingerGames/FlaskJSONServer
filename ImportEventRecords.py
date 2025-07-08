@@ -69,8 +69,8 @@ def insert_stage_events(events):
             cursor.execute("""
                 INSERT INTO [Fact].[StageEvent] (
                     GameVersion, SteamID64, RunId, ReceivedAt, Level, Stage,
-                    BossCode, Victory, Score
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    BossCode, Victory, Score, TurnsTaken
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 event.get("GameVersion"),
                 event.get("SteamID64"),
@@ -81,6 +81,7 @@ def insert_stage_events(events):
                 event.get("BossCode"),
                 event.get("Victory"),
                 event.get("Score"),
+                event.get("TurnsTaken"),
             ))
             print(f"Inserted StageEvent at {event.get('received_at')}")
         else:

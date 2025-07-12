@@ -50,7 +50,6 @@ def insert_item_events(events):
                 event.get("ChestCode"),
                 event.get("TokenCode"),
             ))
-            print(f"Inserted ItemEvent at {event.get('received_at')}")
         else:
             print(f"Skipped duplicate ItemEvent at {event.get('received_at')}")
     conn.commit()

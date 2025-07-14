@@ -50,9 +50,10 @@ def insert_item_events(events):
                 event.get("ChestCode"),
                 event.get("TokenCode"),
             ))
+            conn.commit()
         else:
             print(f"Skipped duplicate ItemEvent at {event.get('received_at')}")
-    conn.commit()
+    
 
 def insert_stage_events(events):
     for event in events:
@@ -82,9 +83,10 @@ def insert_stage_events(events):
                 event.get("Score"),
                 event.get("TurnsTaken"),
             ))
+            conn.commit()
         else:
             print(f"Skipped duplicate StageEvent at {event.get('received_at')}")
-    conn.commit()
+    
 
 def insert_error_events(events):
     for event in events:
@@ -111,9 +113,10 @@ def insert_error_events(events):
                 event.get("Message"),
                 event.get("StackTrace"),
             ))
+            conn.commit()
         else:
             print(f"Skipped potential duplicate ErrorEvent at {event.get('received_at')} with message: {event.get('Message')}")
-    conn.commit()
+    
 
 def main():
     item_events = fetch_logs("get-item-logs")
